@@ -59,7 +59,7 @@ module Jekyll
     #
     # Returns nothing
     def do_layout(payload, layouts)
-      info = { :filters => [Jekyll::Filters], :registers => { :site => self.site } }
+      info = { :filters => [Jekyll::Filters, Jekyll::Filters::Custom.extensions], :registers => { :site => self.site } }
 
       # render and transform content (this becomes the final content of the object)
       payload["content_type"] = self.content_type
