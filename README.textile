@@ -370,6 +370,37 @@ Convert an array into a sentence.
 becomes
 
   foo, bar, and baz
+
+h3. Custom Filters
+
+Jekyll can use custom liquid filters for the rendering of your site, these
+can be created in the same way as standard liquid filters. Before a filter
+will work through Jekyll you need to include the filter module:
+
+	include Jekyll::Filters::Custom
+
+Filters are expected inside a <code>_filters</code> directory at the root of
+your source directory. 
+
+Jekyll custom liquid filter example:
+
+	module MyModule
+		module StringFilter
+			include Jekyll::Filters::Custom
+
+			def my_filter(arg)
+				"Hello World!"
+			end
+		end
+	end
+
+You would then be able to use the filter inside your templates:
+
+	{{ "arg" | my_filter }}
+
+Custom filters can be disabled by running Jekyll with the disable flag:
+
+	$ jekyll --disable-custom-filters
   
 h3. Textilize
 
