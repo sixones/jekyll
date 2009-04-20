@@ -115,7 +115,7 @@ module Jekyll
     end
     
     def read_filters
-      base = File.join(self.source, '_posts')
+      base = File.join(self.source, '_filters')
       entries = []
       Dir.chdir(base) { entries = filter_entries(Dir['*.rb']) }
       
