@@ -78,7 +78,7 @@ module Jekyll
           end
       end
       
-      if self.config['cu_filters']
+      if self.config['custom_filters']
         self.read_filters
       end
     end
