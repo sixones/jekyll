@@ -200,6 +200,7 @@ The default configuration is shown below as in YAML format:
   pygments:    false
   markdown:    maruku
   permalink:   date
+  custom_filters: false
 
   maruku:
     use_tex:    false
@@ -398,9 +399,11 @@ You would then be able to use the filter inside your templates:
 
 	{{ "arg" | my_filter }}
 
-Custom filters can be disabled by running Jekyll with the disable flag:
+Custom filters can be enable by running Jekyll with the flag:
 
-	$ jekyll --disable-custom-filters
+	$ jekyll --custom-filters
+	
+You can also use the <code>custom_filters</code> property in the YML config.
   
 h3. Textilize
 
