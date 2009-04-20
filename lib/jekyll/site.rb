@@ -77,6 +77,10 @@ module Jekyll
             puts "The maruku gem is required for markdown support!"
           end
       end
+      
+      if self.config['cu_filters']
+        self.read_filters
+      end
     end
 
     def textile(content)
@@ -108,6 +112,16 @@ module Jekyll
       end
     rescue Errno::ENOENT => e
       # ignore missing layout dir
+    end
+    
+    def read_filters
+      base = File.join(self.source, '_posts')
+      entries = []
+      Dir.chdir(base) { entries = filter_entries(Dir['*.rb']) }
+      
+      entries.each do |f|
+        require File.join(base, f)
+      end
     end
 
     # Read all the files in <base>/_posts and create a new Post object with each one.
