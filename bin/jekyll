@@ -43,6 +43,10 @@ opts = OptionParser.new do |opts|
   opts.on("--pygments", "Use pygments to highlight code") do
     options['pygments'] = true
   end
+  
+  opts.on("--custom-filters", "Use custom filters in the _filters dir") do
+    options['cu_filters'] = true
+  end
 
   opts.on("--rdiscount", "Use rdiscount gem for Markdown") do
     options['markdown'] = 'rdiscount'
