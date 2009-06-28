@@ -18,9 +18,12 @@ module Jekyll
       name =~ MATCHER
     end
 
-    attr_accessor :site
-    attr_accessor :date, :slug, :ext, :categories, :topics, :published
-    attr_accessor :data, :content, :output
+    attr_accessor :site, :date, :slug, :ext, :published, :data, :content, :output, :tags
+    attr_writer :categories
+
+    def categories
+      @categories ||= []
+    end
 
     # Initialize this Post instance.
     #   +site+ is the Site
@@ -35,10 +38,6 @@ module Jekyll
       @name = name
 
       self.categories = dir.split('/').reject { |x| x.empty? }
-
-      parts = name.split('/')
-      self.topics = parts.size > 1 ? parts[0..-2] : []
-
       self.process(name)
       self.read_yaml(@base, name)
 
@@ -46,6 +45,14 @@ module Jekyll
         self.published = false
       else
         self.published = true
+      end
+
+      if self.data.has_key?("tag")
+        self.tags = [self.data["tag"]]
+      elsif self.data.has_key?("tags")
+        self.tags = self.data['tags']
+      else
+        self.tags = []
       end
 
       if self.categories.empty?
@@ -63,11 +70,15 @@ module Jekyll
       end
     end
 
-    # Spaceship is based on Post#date
+    # Spaceship is based on Post#date, slug
     #
     # Returns -1, 0, 1
     def <=>(other)
-      self.date <=> other.date
+      cmp = self.date <=> other.date
+      if 0 == cmp
+       cmp = self.slug <=> other.slug
+      end
+      return cmp
     end
 
     # Extract information from the post filename
@@ -88,16 +99,7 @@ module Jekyll
     #
     # Returns <String>
     def dir
-      if permalink
-        permalink.to_s.split("/")[0..-2].join("/") + '/'
-      else
-        prefix = self.categories.empty? ? '' : '/' + self.categories.join('/')
-        if [:date, :pretty].include?(self.site.permalink_style)
-          prefix + date.strftime("/%Y/%m/%d/")
-        else
-          prefix + '/'
-        end
-      end
+      File.dirname(url)
     end
 
     # The full path and filename of the post.
@@ -109,13 +111,35 @@ module Jekyll
       self.data && self.data['permalink']
     end
 
+    def template
+      case self.site.permalink_style
+      when :pretty
+        "/:categories/:year/:month/:day/:title/"
+      when :none
+        "/:categories/:title.html"
+      when :date
+        "/:categories/:year/:month/:day/:title.html"
+      else
+        self.site.permalink_style.to_s
+      end
+    end
+
     # The generated relative url of this post
     # e.g. /2008/11/05/my-awesome-post.html
     #
     # Returns <String>
     def url
-      ext = self.site.permalink_style == :pretty ? '' : '.html'
-      permalink || self.id + ext
+      return permalink if permalink
+
+      @url ||= {
+        "year"       => date.strftime("%Y"),
+        "month"      => date.strftime("%m"),
+        "day"        => date.strftime("%d"),
+        "title"      => CGI.escape(slug),
+        "categories" => categories.sort.join('/')
+      }.inject(template) { |result, token|
+        result.gsub(/:#{token.first}/, token.last)
+      }.gsub(/\/\//, "/")
     end
 
     # The UID for this post (useful in feeds)
@@ -123,7 +147,7 @@ module Jekyll
     #
     # Returns <String>
     def id
-      self.dir + self.slug
+      File.join(self.dir, self.slug)
     end
 
     # Calculate related posts.
@@ -172,9 +196,10 @@ module Jekyll
     def write(dest)
       FileUtils.mkdir_p(File.join(dest, dir))
 
-      path = File.join(dest, self.url)
+      # The url needs to be unescaped in order to preserve the correct filename
+      path = File.join(dest, CGI.unescape(self.url))
 
-      if self.site.permalink_style == :pretty
+      if template[/\.html$/].nil?
         FileUtils.mkdir_p(path)
         path = File.join(path, "index.html")
       end
@@ -188,15 +213,15 @@ module Jekyll
     #
     # Returns <Hash>
     def to_liquid
-      { "title" => self.data["title"] || self.slug.split('-').select {|w| w.capitalize! || w }.join(' '),
-        "url" => self.url,
-        "date" => self.date,
-        "id" => self.id,
-        "topics" => self.topics,
+      { "title"      => self.data["title"] || self.slug.split('-').select {|w| w.capitalize! || w }.join(' '),
+        "url"        => self.url,
+        "date"       => self.date,
+        "id"         => self.id,
         "categories" => self.categories,
-        "next" => self.next,
-        "previous" => self.previous,
-        "content" => self.content }.deep_merge(self.data)
+        "next"       => self.next,
+        "previous"   => self.previous,
+        "tags"       => self.tags,
+        "content"    => self.content }.deep_merge(self.data)
     end
 
     def inspect

@@ -41,6 +41,8 @@ class TestPost < Test::Unit::TestCase
         assert_equal Time.parse("2008-10-19"), @post.date
         assert_equal "foo-bar", @post.slug
         assert_equal ".textile", @post.ext
+        assert_equal "/2008/10/19", @post.dir
+        assert_equal "/2008/10/19/foo-bar", @post.id
       end
 
       should "create url based on date and title" do
@@ -49,14 +51,112 @@ class TestPost < Test::Unit::TestCase
         assert_equal "/2008/10/19/foo-bar.html", @post.url
       end
 
-      should "respect permalink" do
+      should "CGI escape urls" do
+        @post.categories = []
+        @post.process("2009-03-12-hash-#1.markdown")
+        assert_equal "/2009/03/12/hash-%231.html", @post.url
+        assert_equal "/2009/03/12/hash-#1", @post.id
+      end
+
+      should "respect permalink in yaml front matter" do
         file = "2008-12-03-permalinked-post.textile"
         @post.process(file)
         @post.read_yaml(@source, file)
 
         assert_equal "my_category/permalinked-post", @post.permalink
-        assert_equal "my_category/", @post.dir
+        assert_equal "my_category", @post.dir
         assert_equal "my_category/permalinked-post", @post.url
+      end
+
+      context "with CRLF linebreaks" do
+        setup do
+          @real_file = "2009-05-24-yaml-linebreak.markdown"
+          @source = source_dir('win/_posts')
+        end
+        should "read yaml front-matter" do
+          @post.read_yaml(@source, @real_file)
+
+          assert_equal({"title" => "Test title", "layout" => "post", "tag" => "Ruby"}, @post.data)
+          assert_equal "\r\nThis is the content", @post.content
+        end
+      end
+
+      context "with site wide permalink" do
+        setup do
+          @post.categories = []
+        end
+
+        context "with unspecified (date) style" do
+          setup do
+            @post.process(@fake_file)
+          end
+
+          should "process the url correctly" do
+            assert_equal "/:categories/:year/:month/:day/:title.html", @post.template
+            assert_equal "/2008/10/19/foo-bar.html", @post.url
+          end
+        end
+
+        context "with unspecified (date) style and a category" do
+          setup do
+            @post.categories << "beer"
+            @post.process(@fake_file)
+          end
+
+          should "process the url correctly" do
+            assert_equal "/:categories/:year/:month/:day/:title.html", @post.template
+            assert_equal "/beer/2008/10/19/foo-bar.html", @post.url
+          end
+        end
+
+        context "with unspecified (date) style and categories" do
+          setup do
+            @post.categories << "food"
+            @post.categories << "beer"
+            @post.process(@fake_file)
+          end
+
+          should "process the url correctly" do
+            assert_equal "/:categories/:year/:month/:day/:title.html", @post.template
+            assert_equal "/beer/food/2008/10/19/foo-bar.html", @post.url
+          end
+        end
+
+        context "with none style" do
+          setup do
+            @post.site.permalink_style = :none
+            @post.process(@fake_file)
+          end
+
+          should "process the url correctly" do
+            assert_equal "/:categories/:title.html", @post.template
+            assert_equal "/foo-bar.html", @post.url
+          end
+        end
+
+        context "with pretty style" do
+          setup do
+            @post.site.permalink_style = :pretty
+            @post.process(@fake_file)
+          end
+
+          should "process the url correctly" do
+            assert_equal "/:categories/:year/:month/:day/:title/", @post.template
+            assert_equal "/2008/10/19/foo-bar/", @post.url
+          end
+        end
+
+        context "with prefix style and no extension" do
+          setup do
+            @post.site.permalink_style = "/prefix/:title"
+            @post.process(@fake_file)
+          end
+
+          should "process the url correctly" do
+            assert_equal "/prefix/:title", @post.template
+            assert_equal "/prefix/foo-bar", @post.url
+          end
+        end
       end
 
       should "read yaml front-matter" do
@@ -124,6 +224,28 @@ class TestPost < Test::Unit::TestCase
         assert post.categories.include?('baz')
       end
 
+      should "recognize tag in yaml" do
+        post = setup_post("2009-05-18-tag.textile")
+        assert post.tags.include?('code')
+      end
+
+      should "recognize tags in yaml" do
+        post = setup_post("2009-05-18-tags.textile")
+        assert post.tags.include?('food')
+        assert post.tags.include?('cooking')
+        assert post.tags.include?('pizza')
+      end
+      
+      should "allow no yaml" do
+        post = setup_post("2009-06-22-no-yaml.textile")
+        assert_equal "No YAML.", post.content
+      end
+
+      should "allow empty yaml" do
+        post = setup_post("2009-06-22-empty-yaml.textile")
+        assert_equal "Empty YAML.", post.content
+      end
+
       context "rendering" do
         setup do
           clear_dest
@@ -142,6 +264,16 @@ class TestPost < Test::Unit::TestCase
 
           assert File.directory?(dest_dir)
           assert File.exists?(File.join(dest_dir, '2008', '10', '18', 'foo-bar.html'))
+        end
+
+        should "write properly without html extension" do
+          post = setup_post("2008-10-18-foo-bar.textile")
+          post.site.permalink_style = ":title"
+          do_render(post)
+          post.write(dest_dir)
+
+          assert File.directory?(dest_dir)
+          assert File.exists?(File.join(dest_dir, 'foo-bar', 'index.html'))
         end
 
         should "insert data" do
@@ -164,7 +296,6 @@ class TestPost < Test::Unit::TestCase
     should "generate categories and topics" do
       post = Post.new(@site, File.join(File.dirname(__FILE__), *%w[source]), 'foo', 'bar/2008-12-12-topical-post.textile')
       assert_equal ['foo'], post.categories
-      assert_equal ['bar'], post.topics
     end
 
   end
