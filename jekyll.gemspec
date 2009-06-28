@@ -2,11 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{jekyll}
-<<<<<<< HEAD:jekyll.gemspec
-  s.version = "0.5.1"
-=======
   s.version = "0.5.2"
->>>>>>> f1c8e388e406e2cc022354562d8bd683d1262072:jekyll.gemspec
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Tom Preston-Werner"]
@@ -19,55 +15,6 @@ Gem::Specification.new do |s|
     "README.textile"
   ]
   s.files = [
-<<<<<<< HEAD:jekyll.gemspec
-    "History.txt",
-    "README.textile",
-    "Rakefile",
-    "VERSION.yml",
-    "bin/jekyll",
-    "lib/jekyll.rb",
-    "lib/jekyll/albino.rb",
-    "lib/jekyll/converters/csv.rb",
-    "lib/jekyll/converters/mephisto.rb",
-    "lib/jekyll/converters/mt.rb",
-    "lib/jekyll/converters/textpattern.rb",
-    "lib/jekyll/converters/typo.rb",
-    "lib/jekyll/converters/wordpress.rb",
-    "lib/jekyll/convertible.rb",
-    "lib/jekyll/core_ext.rb",
-    "lib/jekyll/custom_filters.rb",
-    "lib/jekyll/filters.rb",
-    "lib/jekyll/layout.rb",
-    "lib/jekyll/page.rb",
-    "lib/jekyll/post.rb",
-    "lib/jekyll/site.rb",
-    "lib/jekyll/tags/highlight.rb",
-    "lib/jekyll/tags/include.rb",
-    "test/helper.rb",
-    "test/source/_includes/sig.markdown",
-    "test/source/_layouts/default.html",
-    "test/source/_layouts/simple.html",
-    "test/source/_posts/2008-02-02-not-published.textile",
-    "test/source/_posts/2008-02-02-published.textile",
-    "test/source/_posts/2008-10-18-foo-bar.textile",
-    "test/source/_posts/2008-11-21-complex.textile",
-    "test/source/_posts/2008-12-03-permalinked-post.textile",
-    "test/source/_posts/2008-12-13-include.markdown",
-    "test/source/_posts/2009-01-27-array-categories.textile",
-    "test/source/_posts/2009-01-27-categories.textile",
-    "test/source/_posts/2009-01-27-category.textile",
-    "test/source/category/_posts/2008-9-23-categories.textile",
-    "test/source/css/screen.css",
-    "test/source/foo/_posts/bar/2008-12-12-topical-post.textile",
-    "test/source/index.html",
-    "test/source/z_category/_posts/2008-9-23-categories.textile",
-    "test/suite.rb",
-    "test/test_filters.rb",
-    "test/test_generated_site.rb",
-    "test/test_post.rb",
-    "test/test_site.rb",
-    "test/test_tags.rb"
-=======
     ".gitignore",
      "History.txt",
      "README.textile",
@@ -137,7 +84,6 @@ Gem::Specification.new do |s|
      "test/test_post.rb",
      "test/test_site.rb",
      "test/test_tags.rb"
->>>>>>> f1c8e388e406e2cc022354562d8bd683d1262072:jekyll.gemspec
   ]
   s.homepage = %q{http://github.com/mojombo/jekyll}
   s.rdoc_options = ["--charset=UTF-8"]
