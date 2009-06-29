@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{jekyll}
-  s.version = "0.5.2"
+  s.version = "0.5.2.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Tom Preston-Werner"]
@@ -41,6 +41,7 @@ Gem::Specification.new do |s|
      "lib/jekyll/converters/wordpress.rb",
      "lib/jekyll/convertible.rb",
      "lib/jekyll/core_ext.rb",
+     "lib/jekyll/custom_filters.rb",
      "lib/jekyll/filters.rb",
      "lib/jekyll/layout.rb",
      "lib/jekyll/page.rb",
